@@ -13,8 +13,11 @@
 class Data
 {
 public:
-	Data(const QString &fileName, bool tryUnknown = true);
-	Data(const QUrl &url);
+    Data();
+
+    bool load(const QString &fileName, bool tryUnknown = true);
+    bool load(const QUrl &url);
+    bool save(const QString &fileName);
 
 	bool isValid() const {return _valid;}
 	const QString &errorString() const {return _errorString;}
@@ -29,7 +32,8 @@ public:
 	static QStringList filter();
 
 private:
-	void processData(QList<TrackData> &trackData, QList<RouteData> &routeData);
+    bool processData(QList<TrackData> &trackData, QList<RouteData> &routeData);
+    bool GenerateData(QList<TrackData> &trackData, QList<RouteData> &routeData);
 
 	bool _valid;
 	QString _errorString;
