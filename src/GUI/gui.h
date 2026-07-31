@@ -61,6 +61,8 @@ private slots:
 	void printFile();
 	void exportPDFFile();
 	void exportPNGFile();
+    //TODO: test
+    void openTest();
 	void openFile();
 	void openDir();
 #ifdef Q_OS_ANDROID
@@ -266,6 +268,8 @@ private:
 	QAction *_printFileAction;
 	QAction *_exportPDFFileAction;
 	QAction *_exportPNGFileAction;
+    //TODO: test
+    QAction *_testAction;
 	QAction *_openFileAction;
 	QAction *_openDirAction;
 	QAction *_browseDirAction;

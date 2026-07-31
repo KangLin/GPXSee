@@ -410,6 +410,10 @@ void GUI::createActions()
 	connect(_mapLayersActionGroup, &QActionGroup::triggered, this,
 	  &GUI::selectMapLayer);
 
+    // TODO: test
+    _testAction = new QAction(QIcon::fromTheme(OPEN_FILE_NAME,
+                                               QIcon(OPEN_FILE_ICON)), tr("Open test..."), this);
+    connect(_testAction, &QAction::triggered, this, &GUI::openTest);
 	// Position
     _recordPostionAction = new QAction(tr("Start record positions"), this);
     _recordPostionAction->setCheckable(true);
@@ -885,6 +889,8 @@ void GUI::createMenus()
 #else
 	QMenu *positionMenu = menuBar()->addMenu(tr("Position"));
 #endif
+    //TODO: test
+    positionMenu->addAction(_testAction);
     positionMenu->addAction(_recordPostionAction);
     positionMenu->addAction(_pauseRecordPositionAction);
     positionMenu->addSeparator();
@@ -1176,6 +1182,50 @@ void GUI::openFile()
 		openFile(files.at(i), true, showError);
 	if (!files.isEmpty())
 		_dataDir = QFileInfo(files.last()).path();
+}
+
+//TODO: test
+#include <QTimer>
+static Data g_data;
+void GUI::openTest()
+{
+    QString path = QFileDialog::getOpenFileName(this, tr("Open file"), _dataDir);
+    if(path.isEmpty()) return;
+
+    QFileInfo fi(path);
+    QString canonicalPath(fi.canonicalFilePath());
+
+    if (_files.contains(canonicalPath))
+        return;
+
+    if (g_data.load(path)) {
+        static QTimer timer;
+        timer.disconnect(this);
+        connect(&timer, &QTimer::timeout, this, [this]() {
+            static int t = 0, s = 0, p = 0;
+            auto tracks = g_data.tracks();
+            if(t < tracks.size()) {
+                auto path = tracks.at(t).path();
+                if(s < path.size()) {
+                    if(p < path.at(s).size()) {
+                        if(_mapView) {
+                            auto pp = path.at(s).at(p);
+                            QGeoPositionInfo info;
+                            info.setCoordinate(QGeoCoordinate(pp.coordinates().lat(), pp.coordinates().lon()));
+                            updatePosition(info);
+                            p++;
+                        }
+                    } else
+                        s++;
+                } else
+                    t++;
+            } else
+                timer.stop();
+        });
+        timer.start(1000);
+    }
+
+    return;
 }
 
 void GUI::openDir(const QString &path, int &showError)
